@@ -4,3 +4,6 @@ __pycache__
 emca_debug.log
 /server/build
 CMakeLists.txt.user
+build-*/*
+*.egg-info
+.vscode

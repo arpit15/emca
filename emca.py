@@ -26,15 +26,15 @@
 from PySide2.QtWidgets import QApplication
 from PySide2.QtCore import QFile, QTextStream, QCoreApplication
 from PySide2.QtCore import Qt
-from core.logger import InitLogSystem
+from emca.core.logger import InitLogSystem
 import sys
 import os
 
-from model.model import Model
-from view.view_main.main_view import MainView
-from controller.controller import Controller
-from renderer.scene_renderer import SceneRenderer
-import resources.breeze_resources
+from emca.model.model import Model
+from emca.view.view_main.main_view import MainView
+from emca.controller.controller import Controller
+from emca.renderer.scene_renderer import SceneRenderer
+import emca.resources.breeze_resources
 
 
 class EMCAClient(object):
