@@ -24,7 +24,8 @@
 """
 
 from core.hdr_graphics_view_base import HDRGraphicsViewBase
-from PySide2.QtCore import QPoint
+from PySide2.QtCore import QPoint, QRect, QSize, Signal
+from PySide2.QtWidgets import QRubberBand
 import logging
 
 
@@ -41,11 +42,17 @@ class HDRGraphicsView(HDRGraphicsViewBase):
         HDRGraphicsView
         Custom QGraphicsView which holds the rendered image and handles interactions
     """
-
+    rectChanged = Signal(QRect)
     def __init__(self, parent : ViewRenderImage):
         HDRGraphicsViewBase.__init__(self)
         self._parent = parent
         self._old_scene_pos = QPoint()
+
+        self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)
+        self.changeRubberBand = False
+
+        self._rect_top_left = QPoint()
+        self._rect_bot_right = QPoint()
 
     def mousePressEvent(self, q_mouse_event):
         """
@@ -55,8 +62,12 @@ class HDRGraphicsView(HDRGraphicsViewBase):
         :return:
         """
         global_pos = q_mouse_event.globalPos()
+        self._rect_top_left = global_pos
         self._old_scene_pos = self.transform_to_scene_pos(global_pos)
-        super().mousePressEvent(q_mouse_event)
+
+        self.changeRubberBand = True
+
+        # super().mousePressEvent(q_mouse_event)
 
     def mouseReleaseEvent(self, q_mouse_event):
         """
@@ -67,12 +78,36 @@ class HDRGraphicsView(HDRGraphicsViewBase):
         :return:
         """
         global_pos = q_mouse_event.globalPos()
+        self._rect_bot_right = global_pos
         new_pos = self.transform_to_scene_pos(global_pos)
         if self._old_scene_pos == new_pos:
             pixel = self.transform_to_image_coordinate(q_mouse_event.globalPos())
+            # instead of a single pixel iterate over all rect data
             if self.pixel_within_bounds(pixel):
                 self._parent.request_pixel_data(pixel)
-        super().mouseReleaseEvent(q_mouse_event)
+
+        self.changeRubberBand = False
+
+        rect = QRect(
+            self._rect_top_left, 
+            self._rect_bot_right
+        )
+        self.rubberBand.setGeometry(rect)
+        self.rectChanged.emit(self.rubberBand.geometry())
+        self.rubberBand.show()
+
+        # the following fails as the request is sent over a single connection
+        # iterate over all the pixels and get their info
+        # rect_size = rect.size()
+        # for y in range(rect_size.height()):
+        #     for x in range(rect_size.width()):
+        #         currPt = QPoint(rect.topLeft().x() + x, rect.topLeft().y() + y)
+        #         pixel = self.transform_to_image_coordinate(currPt)
+        #         # instead of a single pixel iterate over all rect data
+        #         if self.pixel_within_bounds(pixel):
+        #             self._parent.request_pixel_data(pixel)
+
+        # super().mouseReleaseEvent(q_mouse_event)
 
     def mouseMoveEvent(self, q_mouse_event):
         """
@@ -83,7 +118,12 @@ class HDRGraphicsView(HDRGraphicsViewBase):
         image_coord = self.transform_to_image_coordinate(q_mouse_event.globalPos())
         text = '({},{})'.format(image_coord.x(), image_coord.y())
         self._parent.labelCurrentPos.setText(text)
-        super().mouseMoveEvent(q_mouse_event)
+
+        if self.changeRubberBand:
+            self.rubberBand.setGeometry(QRect(self._old_scene_pos, q_mouse_event.pos()).normalized())
+            self.rectChanged.emit(self.rubberBand.geometry())
+
+        # super().mouseMoveEvent(q_mouse_event)
 
     def dropEvent(self, q_drop_event):
         try:

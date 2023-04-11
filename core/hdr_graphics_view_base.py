@@ -105,24 +105,24 @@ class HDRGraphicsViewBase(QGraphicsView):
             if path.endswith('.exr'):
                 self.load_hdr_image(path)
 
-    def wheelEvent(self, q_wheel_event):
-        """
-        Handles the mouse wheel event for zooming in and out
-        :param q_wheel_event:
-        :return:
-        """
-        angle_delta = q_wheel_event.angleDelta()
-        old_pos = self.mapToScene(q_wheel_event.pos())
-        if angle_delta.y() > 0:
-            self.scale(self._scale_factor,
-                       self._scale_factor)
-        else:
-            self.scale(1 / self._scale_factor,
-                       1 / self._scale_factor)
-        new_pos = self.mapToScene(q_wheel_event.pos())
-        delta = new_pos - old_pos
-        self.translate(delta.x(), delta.y())
-        q_wheel_event.accept()
+    # def wheelEvent(self, q_wheel_event):
+    #     """
+    #     Handles the mouse wheel event for zooming in and out
+    #     :param q_wheel_event:
+    #     :return:
+    #     """
+    #     angle_delta = q_wheel_event.angleDelta()
+    #     old_pos = self.mapToScene(q_wheel_event.pos())
+    #     if angle_delta.y() > 0:
+    #         self.scale(self._scale_factor,
+    #                    self._scale_factor)
+    #     else:
+    #         self.scale(1 / self._scale_factor,
+    #                    1 / self._scale_factor)
+    #     new_pos = self.mapToScene(q_wheel_event.pos())
+    #     delta = new_pos - old_pos
+    #     self.translate(delta.x(), delta.y())
+    #     q_wheel_event.accept()
 
     def set_falsecolor(self, falsecolor : bool):
         self._hdri.falsecolor = falsecolor

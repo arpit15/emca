@@ -54,7 +54,7 @@ class HighlighterBase(object):
         self.callback_send_update_path = callback
 
     def add_rectangle_selector(self, axes : Axes, select_func):
-        rs = RectangleSelector(axes, select_func, useblit=True, rectprops=rectprops)
+        rs = RectangleSelector(axes, select_func, useblit=True, props=rectprops)
         self._rs.append(rs)
 
     def clear_rectangle_selectors(self):

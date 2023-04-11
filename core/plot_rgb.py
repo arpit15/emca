@@ -59,7 +59,7 @@ class RGBScatterPlot(FigureBase):
         self.highlighter.add_rectangle_selector(self.axes[1, 0], self.select_g)
         self.highlighter.add_rectangle_selector(self.axes[2, 0], self.select_b)
 
-        self.highlighter.enable_rectangle_selector(False)
+        self.highlighter.enable_rectangle_selector(True)
 
     def init_figure_layout(self):
         self.axes[0, 0].set_title("Red", color=self.color_title)
