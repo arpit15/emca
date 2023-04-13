@@ -114,6 +114,10 @@ class SocketStreamClient(QThread):
         self._stream.write_uint(int(pixel.y()))
         self._stream.write_uint(int(sample_count))
 
+    def request_reload_scene(self):
+        logging.info(f"Request hot reload -- {ServerMsg.EMCA_REQUEST_RELOAD_SCENE.value}")
+        self._stream.write_short(ServerMsg.EMCA_REQUEST_RELOAD_SCENE.value)
+
     def request_disconnect(self):
         """
         Sends disconnect signal to server
@@ -200,6 +204,8 @@ class SocketStreamClient(QThread):
                 self._model.deserialize_camera(self._stream)
             elif state is ServerMsg.EMCA_RESPONSE_SCENE:
                 self._model.deserialize_scene_objects(self._stream)
+            elif state is ServerMsg.EMCA_RESPONSE_RELOAD_SCENE:
+                logging.info("Received response for Hot reload!")
             elif state is ServerMsg.EMCA_DISCONNECT:
                 self._sendStateMsgSig.emit((StateMsg.DISCONNECT, None))
                 break

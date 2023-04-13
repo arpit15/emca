@@ -4,22 +4,22 @@
     (c) Christoph Kreisl 2020
     (c) Lukas Ruppert 2021
 
-	Licensed to the Apache Software Foundation (ASF) under one
-	or more contributor license agreements.  See the NOTICE file
-	distributed with this work for additional information
-	regarding copyright ownership.  The ASF licenses this file
-	to you under the Apache License, Version 2.0 (the
-	"License"); you may not use this file except in compliance
-	with the License.  You may obtain a copy of the License at
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing,
-	software distributed under the License is distributed on an
-	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-	KIND, either express or implied.  See the License for the
-	specific language governing permissions and limitations
-	under the License.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
 */
 
 #ifndef INCLUDE_EMCA_EMCASERVER_H_
@@ -38,14 +38,15 @@
 
 EMCA_NAMESPACE_BEGIN
 
-class EMCAServer {
+class EMCAServer
+{
 public:
-    EMCAServer(RenderInterface* renderer, DataApi* dataApi);
+    EMCAServer(RenderInterface *renderer, DataApi *dataApi);
     ~EMCAServer() { stop(); }
 
     /// runs the main TCP server that communicates with the client.
     /// does not return until the server is shut down.
-    void run(uint16_t port=50013);
+    void run(uint16_t port = 50013);
 
     /// disconnect the current client
     void disconnect();
@@ -61,15 +62,17 @@ private:
     void respondRenderImage();
     void respondCameraData();
     void respondSceneData();
+    void respondReloadScene();
     void respondRenderPixel();
     bool respondPluginRequest(short id);
 
-    RenderInterface* m_renderer {nullptr};
-    DataApi* m_dataApi {nullptr};
+    RenderInterface *m_renderer{nullptr};
+    DataApi *m_dataApi{nullptr};
 
     typedef int socket_t;
 
-    class SocketStream final : public Stream {
+    class SocketStream final : public Stream
+    {
     public:
         SocketStream(socket_t client_socket) : m_clientSocket(client_socket) {}
 
@@ -80,8 +83,8 @@ private:
         socket_t m_clientSocket; // not owned - will not be closed on destruction
     };
 
-    socket_t m_clientSocket {-1};
-    socket_t m_serverSocket {-1};
+    socket_t m_clientSocket{-1};
+    socket_t m_serverSocket{-1};
     std::unique_ptr<SocketStream> m_stream;
 
     std::vector<Mesh> m_mesh_data;

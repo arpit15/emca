@@ -36,8 +36,9 @@
 
 EMCA_NAMESPACE_BEGIN
 
-EMCAServer::EMCAServer(RenderInterface* renderer, DataApi* dataApi)
-    : m_renderer{renderer}, m_dataApi{dataApi} {
+EMCAServer::EMCAServer(RenderInterface *renderer, DataApi *dataApi)
+    : m_renderer{renderer}, m_dataApi{dataApi}
+{
     if (!renderer || !dataApi)
         throw std::logic_error("a renderer and a data api instance need to be provided");
 
@@ -46,7 +47,8 @@ EMCAServer::EMCAServer(RenderInterface* renderer, DataApi* dataApi)
     m_dataApi->heatmap.initialize(m_mesh_data);
 }
 
-void EMCAServer::run(uint16_t port) {
+void EMCAServer::run(uint16_t port)
+{
     struct sockaddr_in server_addr, client_addr;
     memset(&server_addr, 0, sizeof(server_addr));
 
@@ -59,21 +61,24 @@ void EMCAServer::run(uint16_t port) {
         throw std::runtime_error("failed to create IP socket");
 
     const int option = 1;
-    if (setsockopt(m_serverSocket, SOL_SOCKET, (SO_REUSEPORT | SO_REUSEADDR), &option, sizeof(option)) < 0) {
+    if (setsockopt(m_serverSocket, SOL_SOCKET, (SO_REUSEPORT | SO_REUSEADDR), &option, sizeof(option)) < 0)
+    {
         close(m_serverSocket);
         m_serverSocket = -1;
         throw std::runtime_error("failed to set socket options");
     }
 
-    if (bind(m_serverSocket, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0) {
+    if (bind(m_serverSocket, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr)) < 0)
+    {
         close(m_serverSocket);
         m_serverSocket = -1;
-        throw std::runtime_error("failed to bind server to port "+std::to_string(port));
+        throw std::runtime_error("failed to bind server to port " + std::to_string(port));
     }
 
     int16_t lastReceivedMsg = Message::EMCA_DISCONNECT;
 
-    while (m_serverSocket >= 0 && lastReceivedMsg == Message::EMCA_DISCONNECT) {
+    while (m_serverSocket >= 0 && lastReceivedMsg == Message::EMCA_DISCONNECT)
+    {
         disconnect();
 
         if (listen(m_serverSocket, 5) < 0)
@@ -81,9 +86,10 @@ void EMCAServer::run(uint16_t port) {
 
         std::cout << "Server is listening for connections ..." << std::endl;
 
-        try {
+        try
+        {
             socklen_t len = sizeof(client_addr);
-            m_clientSocket = accept(m_serverSocket, reinterpret_cast<struct sockaddr*>(&client_addr), &len);
+            m_clientSocket = accept(m_serverSocket, reinterpret_cast<struct sockaddr *>(&client_addr), &len);
             if (m_clientSocket < 0)
                 throw std::runtime_error("failed to accept client socket");
 
@@ -99,7 +105,8 @@ void EMCAServer::run(uint16_t port) {
 
             std::cout << "Handshake complete! Starting data transfer ..." << std::endl;
 
-            while (m_clientSocket >= 0) {
+            while (m_clientSocket >= 0)
+            {
                 // read header of message
                 lastReceivedMsg = m_stream->readShort();
                 std::cout << "Received header msg = " << lastReceivedMsg << std::endl;
@@ -107,7 +114,8 @@ void EMCAServer::run(uint16_t port) {
                 if (respondPluginRequest(lastReceivedMsg))
                     continue;
 
-                switch(lastReceivedMsg) {
+                switch (lastReceivedMsg)
+                {
                 case Message::EMCA_REQUEST_RENDER_INFO:
                     std::cout << "Respond render info msg" << std::endl;
                     respondRenderInfo();
@@ -119,6 +127,10 @@ void EMCAServer::run(uint16_t port) {
                 case Message::EMCA_REQUEST_SCENE:
                     std::cout << "Respond scene data msg" << std::endl;
                     respondSceneData();
+                    break;
+                case Message::EMCA_REQUEST_RELOAD_SCENE:
+                    std::cout << "Reload scene" << std::endl;
+                    respondReloadScene();
                     break;
                 case Message::EMCA_REQUEST_RENDER_IMAGE:
                     std::cout << "Render image msg" << std::endl;
@@ -141,10 +153,14 @@ void EMCAServer::run(uint16_t port) {
                     break;
                 }
             }
-        } catch (std::exception &e) {
+        }
+        catch (std::exception &e)
+        {
             std::cerr << "caught exception: " << e.what() << std::endl;
             continue;
-        } catch (...) {
+        }
+        catch (...)
+        {
             std::cerr << "caught unknown exception" << std::endl;
             continue;
         }
@@ -153,8 +169,10 @@ void EMCAServer::run(uint16_t port) {
     stop();
 }
 
-void EMCAServer::disconnect() {
-    if (m_clientSocket >= 0) {
+void EMCAServer::disconnect()
+{
+    if (m_clientSocket >= 0)
+    {
         if (m_stream.get())
             m_stream->writeShort(Message::EMCA_DISCONNECT);
         m_stream.reset();
@@ -166,9 +184,11 @@ void EMCAServer::disconnect() {
     m_clientSocket = -1;
 }
 
-void EMCAServer::stop() {
+void EMCAServer::stop()
+{
     disconnect();
-    if (m_serverSocket >= 0) {
+    if (m_serverSocket >= 0)
+    {
         if (close(m_serverSocket) == 0)
             std::cout << "stopped server." << std::endl;
         else
@@ -177,7 +197,8 @@ void EMCAServer::stop() {
     m_serverSocket = -1;
 }
 
-void EMCAServer::respondSupportedPlugins() {
+void EMCAServer::respondSupportedPlugins()
+{
     try
     {
         std::cout << "Inform Client about supported Plugins" << std::endl;
@@ -185,97 +206,134 @@ void EMCAServer::respondSupportedPlugins() {
         std::vector<int16_t> supportedPlugins = m_dataApi->plugins.getPluginIds();
         m_stream->writeShort(Message::EMCA_SUPPORTED_PLUGINS);
         m_stream->writeUInt(static_cast<uint32_t>(supportedPlugins.size()));
-        for (short &id : supportedPlugins) {
+        for (short &id : supportedPlugins)
+        {
             m_stream->writeShort(id);
         }
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
     }
 }
 
-void EMCAServer::respondRenderInfo() {
-    try {
+void EMCAServer::respondRenderInfo()
+{
+    try
+    {
         m_stream->writeShort(Message::EMCA_RESPONSE_RENDER_INFO);
         m_stream->writeString(m_renderer->getRendererName());
         m_stream->writeString(m_renderer->getSceneName());
         m_stream->writeUInt(m_renderer->getSampleCount());
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "Render info error: " << e.what() << std::endl;
     }
 }
 
-void EMCAServer::respondRenderImage() {
-    try {
+void EMCAServer::respondReloadScene()
+{
+    try
+    {
+        m_renderer->reload();
+        m_stream->writeShort(Message::EMCA_RESPONSE_RELOAD_SCENE);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Reload scene error: " << e.what() << std::endl;
+    }
+}
+
+void EMCAServer::respondRenderImage()
+{
+    try
+    {
         const uint32_t sampleCount = m_stream->readUInt();
         m_renderer->setSampleCount(sampleCount);
 
         // enabling the heatmap is up to the preprocessing step during rendering
         m_renderer->renderImage();
         // finalize heatmap data (if there is any)
-        if (m_dataApi->heatmap.isCollecting()) {
+        if (m_dataApi->heatmap.isCollecting())
+        {
             m_dataApi->heatmap.finalize();
         }
 
         m_stream->writeShort(Message::EMCA_RESPONSE_RENDER_IMAGE);
-        //TODO: pass through the rendered exr image if the connection is remote
+        // TODO: pass through the rendered exr image if the connection is remote
         m_stream->writeString(m_renderer->getRenderedImagePath());
 
         // send heatmap data, if there is any
         if (m_dataApi->heatmap.hasData())
             respondSceneData();
-    } catch(const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "Render image error: " << e.what() << std::endl;
     }
 }
 
-void EMCAServer::respondCameraData() {
-    try {
+void EMCAServer::respondCameraData()
+{
+    try
+    {
         std::cout << "Send Camera Information ... " << std::flush;
         m_stream->writeShort(Message::EMCA_RESPONSE_CAMERA);
         m_renderer->getCameraData().serialize(m_stream.get());
         std::cout << "done" << std::endl;
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e)
+    {
         std::cerr << "Camera data error: " << e.what() << std::endl;
     }
 }
 
-void EMCAServer::respondSceneData() {
-    try {
+void EMCAServer::respondSceneData()
+{
+    try
+    {
         m_stream->writeShort(Message::EMCA_RESPONSE_SCENE);
 
         const bool has_heatmap_data = m_dataApi->heatmap.hasData();
         m_stream->writeBool(has_heatmap_data);
 
-        if (has_heatmap_data) {
+        if (has_heatmap_data)
+        {
             m_stream->writeString(m_dataApi->heatmap.colormap);
             m_stream->writeBool(m_dataApi->heatmap.show_colorbar);
             m_stream->writeString(m_dataApi->heatmap.label);
 
-            const auto& heatmap_data = m_dataApi->heatmap.getHeatmapData();
+            const auto &heatmap_data = m_dataApi->heatmap.getHeatmapData();
             m_stream->writeUInt(static_cast<uint32_t>(heatmap_data.size()));
             std::cout << "Send Heatmap Information ... " << std::flush;
-            for (const auto& heatmap : heatmap_data) {
+            for (const auto &heatmap : heatmap_data)
+            {
                 heatmap.serialize(m_stream.get());
             }
         }
-        else {
+        else
+        {
             std::cout << "Send Mesh Information ... " << std::flush;
             m_stream->writeUInt(static_cast<uint32_t>(m_mesh_data.size()));
-            for (const auto& mesh : m_mesh_data) {
+            for (const auto &mesh : m_mesh_data)
+            {
                 // send mesh to client
                 mesh.serialize(m_stream.get());
             }
         }
         std::cout << "done" << std::endl;
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e)
+    {
         std::cerr << "Scene data error: " << e.what() << std::endl;
     }
 }
 
-void EMCAServer::respondRenderPixel() {
-    try {
+void EMCAServer::respondRenderPixel()
+{
+    try
+    {
         m_dataApi->enable();
         uint32_t x = m_stream->readUInt();
         uint32_t y = m_stream->readUInt();
@@ -291,58 +349,67 @@ void EMCAServer::respondRenderPixel() {
         m_dataApi->disable();
         // clear the current path data - even when selecting the same pixel again, it will be recomputed
         m_dataApi->clear();
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e)
+    {
         std::cerr << "Render data error: " << e.what() << std::endl;
     }
 }
 
-bool EMCAServer::respondPluginRequest(short id) {
+bool EMCAServer::respondPluginRequest(short id)
+{
     Plugin *plugin = m_dataApi->plugins.getPluginById(id);
     if (!plugin)
         return false;
-    try {
+    try
+    {
         plugin->deserialize(m_stream.get());
         plugin->run();
         plugin->serialize(m_stream.get());
         return true;
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e)
+    {
         std::cerr << "Plugin error: " << e.what() << std::endl;
     }
 
     return false;
 }
 
-void EMCAServer::SocketStream::read(void *ptr, size_t size) {
-    char* data = reinterpret_cast<char*>(ptr);
-    char* const end = data+size;
+void EMCAServer::SocketStream::read(void *ptr, size_t size)
+{
+    char *data = reinterpret_cast<char *>(ptr);
+    char *const end = data + size;
 
-    while (data < end) {
+    while (data < end)
+    {
         const ssize_t n = recv(m_clientSocket, data, static_cast<size_t>(std::distance(data, end)), 0);
 
         if (n == 0)
             throw std::runtime_error("read failed. remote has disconnected.");
         else if (n < 0)
-            throw std::runtime_error("read failed. socket error: "+std::to_string(errno));
+            throw std::runtime_error("read failed. socket error: " + std::to_string(errno));
 
         data += n;
     }
 }
 
-void EMCAServer::SocketStream::write(const void *ptr, size_t size) {
-    const char* data = reinterpret_cast<const char*>(ptr);
-    const char* const end = data+size;
+void EMCAServer::SocketStream::write(const void *ptr, size_t size)
+{
+    const char *data = reinterpret_cast<const char *>(ptr);
+    const char *const end = data + size;
 
-    while (data < end) {
+    while (data < end)
+    {
         const ssize_t n = send(m_clientSocket, data, static_cast<size_t>(std::distance(data, end)), MSG_NOSIGNAL);
 
         if (n == EPIPE)
             throw std::runtime_error("write failed. remote has disconnected.");
         else if (n < 0)
-            throw std::runtime_error("write failed. socket error: "+std::to_string(errno));
+            throw std::runtime_error("write failed. socket error: " + std::to_string(errno));
 
         data += n;
     }
 }
 
 EMCA_NAMESPACE_END
-

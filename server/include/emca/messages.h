@@ -30,33 +30,36 @@
 EMCA_NAMESPACE_BEGIN
 
 // message identifiers for the TCP protocol
-enum Message {
+enum Message
+{
     // connection management (0x000x)
-    EMCA_HELLO                 = 0x0001,
-    EMCA_SUPPORTED_PLUGINS     = 0x0002,
-    EMCA_DISCONNECT            = 0x000E,
-    EMCA_QUIT                  = 0x000F,
+    EMCA_HELLO = 0x0001,
+    EMCA_SUPPORTED_PLUGINS = 0x0002,
+    EMCA_DISCONNECT = 0x000E,
+    EMCA_QUIT = 0x000F,
 
     // requests from the client (0x001x)
-    EMCA_REQUEST_RENDER_INFO   = 0x0011,
-    EMCA_REQUEST_RENDER_IMAGE  = 0x0012,
-    EMCA_REQUEST_RENDER_PIXEL  = 0x0013,
-    EMCA_REQUEST_CAMERA        = 0x0014,
-    EMCA_REQUEST_SCENE         = 0x0015,
+    EMCA_REQUEST_RENDER_INFO = 0x0011,
+    EMCA_REQUEST_RENDER_IMAGE = 0x0012,
+    EMCA_REQUEST_RENDER_PIXEL = 0x0013,
+    EMCA_REQUEST_CAMERA = 0x0014,
+    EMCA_REQUEST_SCENE = 0x0015,
+    EMCA_REQUEST_RELOAD_SCENE = 0x0016,
 
     // responses to the client (0x002x)
-    EMCA_RESPONSE_RENDER_INFO  = 0x0021,
+    EMCA_RESPONSE_RENDER_INFO = 0x0021,
     EMCA_RESPONSE_RENDER_IMAGE = 0x0022,
     EMCA_RESPONSE_RENDER_PIXEL = 0x0023,
-    EMCA_RESPONSE_CAMERA       = 0x0024,
-    EMCA_RESPONSE_SCENE        = 0x0025,
+    EMCA_RESPONSE_CAMERA = 0x0024,
+    EMCA_RESPONSE_SCENE = 0x0025,
+    EMCA_RESPONSE_RELOAD_SCENE = 0x0026
 };
 
 // shape types that can be transferred to the client
 enum ShapeType
 {
-    TriangleMesh             = 0,
-    SphereMesh               = 1
+    TriangleMesh = 0,
+    SphereMesh = 1
 };
 
 EMCA_NAMESPACE_END

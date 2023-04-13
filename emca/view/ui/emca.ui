@@ -132,6 +132,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btnReload">
+       <property name="text">
+        <string>Reload</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="spacerLayoutToolbar">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

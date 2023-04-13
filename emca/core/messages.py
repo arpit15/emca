@@ -56,6 +56,7 @@ class ServerMsg(Enum):
     EMCA_REQUEST_RENDER_PIXEL  = 0x0013
     EMCA_REQUEST_CAMERA        = 0x0014
     EMCA_REQUEST_SCENE         = 0x0015
+    EMCA_REQUEST_RELOAD_SCENE  = 0x0016
 
     # responses to the client (0x002x)
     EMCA_RESPONSE_RENDER_INFO  = 0x0021
@@ -63,6 +64,7 @@ class ServerMsg(Enum):
     EMCA_RESPONSE_RENDER_PIXEL = 0x0023
     EMCA_RESPONSE_CAMERA       = 0x0024
     EMCA_RESPONSE_SCENE        = 0x0025
+    EMCA_RESPONSE_RELOAD_SCENE = 0x0026
 
     @staticmethod
     def get_server_msg(flag):
@@ -79,13 +81,15 @@ class ServerMsg(Enum):
             0x0013: ServerMsg.EMCA_REQUEST_RENDER_PIXEL,
             0x0014: ServerMsg.EMCA_REQUEST_CAMERA,
             0x0015: ServerMsg.EMCA_REQUEST_SCENE,
+            0x0016: ServerMsg.EMCA_REQUEST_RELOAD_SCENE,
 
             # responses to the client (0x002x)
             0x0021: ServerMsg.EMCA_RESPONSE_RENDER_INFO,
             0x0022: ServerMsg.EMCA_RESPONSE_RENDER_IMAGE,
             0x0023: ServerMsg.EMCA_RESPONSE_RENDER_PIXEL,
             0x0024: ServerMsg.EMCA_RESPONSE_CAMERA,
-            0x0025: ServerMsg.EMCA_RESPONSE_SCENE
+            0x0025: ServerMsg.EMCA_RESPONSE_SCENE,
+            0x0026: ServerMsg.EMCA_RESPONSE_RELOAD_SCENE
         }.get(flag, None)
 
 

@@ -111,6 +111,7 @@ class ViewEMCA(QWidget):
         self.btnFilter.clicked.connect(self.open_filter_view)
         self.btnOptions.clicked.connect(self.open_render_info_view)
         self.btnRender.clicked.connect(self.request_render_image)
+        self.btnReload.clicked.connect(self.request_scene_reload)
 
         self._view_right_button_group = QButtonGroup()
         self._view_right_button_group.addButton(self.btnSampleRGB, 0)
@@ -127,6 +128,9 @@ class ViewEMCA(QWidget):
         self._view_left_button_group.idClicked.connect(self.toggle_view_left)
 
         self.cbPixelHistory.currentIndexChanged.connect(self.request_history_pixel)
+
+    def request_scene_reload(self, clicked):
+        self._controller.stream.request_scene_reload()
 
     def set_controller(self, controller : Controller):
         """

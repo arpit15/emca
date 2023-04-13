@@ -130,6 +130,12 @@ class ControllerSocketStream(object):
         """
         self._sstream_client.request_scene_data()
 
+    def request_scene_reload(self):
+        """
+        Reload the scene
+        """
+        self._sstream_client.request_reload_scene()
+
     def request_render_pixel(self, pixel : QPoint):
         """
         Sends the selected pixel position to the server
