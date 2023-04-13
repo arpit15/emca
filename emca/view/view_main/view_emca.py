@@ -131,6 +131,8 @@ class ViewEMCA(QWidget):
 
     def request_scene_reload(self, clicked):
         self._controller.stream.request_scene_reload()
+        # get new scene info
+        self._controller.stream.request_scene_data()
 
     def set_controller(self, controller : Controller):
         """

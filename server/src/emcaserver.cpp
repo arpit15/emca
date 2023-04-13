@@ -131,6 +131,9 @@ void EMCAServer::run(uint16_t port)
                 case Message::EMCA_REQUEST_RELOAD_SCENE:
                     std::cout << "Reload scene" << std::endl;
                     respondReloadScene();
+                    // update mesh info
+                    m_mesh_data = m_renderer->getMeshData();
+                    m_dataApi->heatmap.initialize(m_mesh_data);
                     break;
                 case Message::EMCA_REQUEST_RENDER_IMAGE:
                     std::cout << "Render image msg" << std::endl;
@@ -315,6 +318,7 @@ void EMCAServer::respondSceneData()
         else
         {
             std::cout << "Send Mesh Information ... " << std::flush;
+            std::cout << "# meshes - " << m_mesh_data.size() << std::flush;
             m_stream->writeUInt(static_cast<uint32_t>(m_mesh_data.size()));
             for (const auto &mesh : m_mesh_data)
             {
