@@ -45,6 +45,8 @@ from emca.view.view_render_image.view_render_image import ViewRenderImage
 from emca.view.view_sample_contribution.view_sample_contribution_plot import ViewSampleContribution
 from emca.view.view_sample_contribution.view_sample_lum_plot import ViewSampleLuminance
 from emca.view.view_sample_contribution.view_sample_depth_plot import ViewSampleDepth
+from emca.view.view_mesh_selector.view_mesh_selector import ViewMeshSelector
+
 import os
 
 import logging
@@ -86,11 +88,13 @@ class ViewEMCA(QWidget):
         self._view_pixel_data = ViewPixelData(parent=self)
         self._view_render_scene = ViewRenderScene(parent=self)
         self._view_render_scene_options = ViewRenderSceneOptions(parent=self)
+        self._view_mesh_selector = ViewMeshSelector(parent=self)
 
         # redrawing is quite expensive, so lets only do that when necessary
-        self._view_rgb_plot.visible = True
-        self._view_lum_plot.visible = False
+        self._view_rgb_plot.visible = False
+        self._view_lum_plot.visible = True
         self._view_depth_plot.visible = False
+        self._view_mesh_selector.visible = False
 
         # stacked widget
         self._stacked_widget_left = QStackedWidget()
@@ -103,6 +107,7 @@ class ViewEMCA(QWidget):
         self._stacked_widget_right.addWidget(self._view_lum_plot)
         self._stacked_widget_right.addWidget(self._view_depth_plot)
         self._stacked_widget_right.addWidget(self._view_pixel_data)
+        self._stacked_widget_right.addWidget(self._view_mesh_selector)
         self.right.addWidget(self._stacked_widget_right)
 
         # connect signals
@@ -118,6 +123,7 @@ class ViewEMCA(QWidget):
         self._view_right_button_group.addButton(self.btnSampleLum, 1)
         self._view_right_button_group.addButton(self.btnPathDepth, 2)
         self._view_right_button_group.addButton(self.btnPathData, 3)
+        self._view_right_button_group.addButton(self.btnMeshSelector, 4)
         self._view_right_button_group.idClicked.connect(self.toggle_view_right)
 
         self._view_left_button_group = QButtonGroup()
@@ -153,6 +159,7 @@ class ViewEMCA(QWidget):
         self._view_connect.set_controller(controller)
         self._view_detector.set_controller(controller)
         self._view_filter.set_controller(controller)
+        self._view_mesh_selector.set_controller(controller)
 
     @Slot(bool, name='open_connect_view')
     def open_connect_view(self, clicked):
@@ -236,6 +243,7 @@ class ViewEMCA(QWidget):
         self._view_rgb_plot.visible   = id == 0
         self._view_lum_plot.visible   = id == 1
         self._view_depth_plot.visible = id == 2
+        self._view_mesh_selector.visible = id == 4
 
         self._stacked_widget_right.setCurrentIndex(id)
 
@@ -318,6 +326,14 @@ class ViewEMCA(QWidget):
         :return: QWidget
         """
         return self._view_lum_plot
+    
+    @property
+    def view_mesh_selector(self):
+        """
+        Returns the final estimate plot view
+        :return: QWidget
+        """
+        return self._view_mesh_selector
 
     @property
     def view_depth_plot(self):

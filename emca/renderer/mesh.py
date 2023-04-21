@@ -115,3 +115,32 @@ class Mesh(Shape):
 
         #logging.info('processed mesh containing {} vertices and {} triangles in: {:.3}s'
         #             .format(mesh.vertex_count, mesh.triangle_count, time.time() - start))
+
+    def update(self, verts, tris):
+        """
+            verts: (nx3) np float
+            faces: (nx3) np float
+        """
+        vertex_count = verts.shape[0]
+        triangle_count = tris.shape[0]
+
+        vertices = vtk.vtkPoints()
+        vertex_float_array = vtk.vtkFloatArray()
+        vertex_float_array.SetArray(verts, vertex_count*3, True)
+        vertex_float_array.SetNumberOfComponents(3)
+        vertex_float_array.SetNumberOfTuples(vertex_count)
+        vertices.SetData(vertex_float_array)
+
+        triangles = vtk.vtkCellArray()
+        triangle_id_array = vtk.vtkIdTypeArray()
+        triangle_id_array.SetArray(tris, triangle_count*4, True)
+        triangles.SetCells(triangle_count, triangle_id_array)
+
+        mesh_poly_data = vtk.vtkPolyData()
+        mesh_poly_data.SetPoints(vertices)
+        mesh_poly_data.SetPolys(triangles)
+
+        self.face_colors = None
+        self.max_value = 0.0
+
+        self.poly_data(mesh_poly_data)

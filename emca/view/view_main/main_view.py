@@ -42,6 +42,7 @@ from emca.view.view_render_scene.view_render_scene_options import ViewRenderScen
 from emca.view.view_sample_contribution.view_sample_contribution_plot import ViewSampleContribution
 from emca.view.view_sample_contribution.view_sample_depth_plot import ViewSampleDepth
 from emca.view.view_sample_contribution.view_sample_lum_plot import ViewSampleLuminance
+from emca.view.view_mesh_selector.view_mesh_selector import ViewMeshSelector
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -181,6 +182,13 @@ class MainView(QMainWindow):
         Returns the view handling the final estimate view
         """
         return self._view_emca.view_lum_plot
+    
+    @property
+    def view_mesh_selector(self) -> ViewMeshSelector:
+        """
+        Returns the view handling the final estimate view
+        """
+        return self._view_emca.view_mesh_selector
 
     @property
     def view_depth_plot(self) -> ViewSampleDepth:

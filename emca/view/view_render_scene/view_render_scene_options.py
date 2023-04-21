@@ -254,7 +254,7 @@ class ViewRenderSceneOptions(QWidget):
             self.leCmapLabel.setText(heatmap_options.get('label', 'unknown'))
             self.dsbCmapMin.setValue(heatmap_options.get('min', 0.0))
             self.dsbCmapMax.setValue(heatmap_options.get('max', 1.0))
-            self.cbShow3DData.setChecked(heatmap_options.get('enabled', True))
+            self.cbShow3DData.setChecked(heatmap_options.get('enabled', False))
             self.cbShowColorbar.setChecked(heatmap_options.get('colorbar', True))
 
             self._propagate_signals = True
