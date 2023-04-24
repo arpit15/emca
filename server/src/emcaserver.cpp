@@ -345,14 +345,14 @@ void EMCAServer::respondRenderPixel()
 
         m_renderer->setSampleCount(sampleCount);
 
-        std::cout << "Respond Pathdata of pixel: (" << x << ", " << y << ")" << std::endl;
         m_renderer->renderPixel(x, y);
 
         m_stream->writeShort(Message::EMCA_RESPONSE_RENDER_PIXEL);
         m_dataApi->serialize(m_stream.get());
         m_dataApi->disable();
         // clear the current path data - even when selecting the same pixel again, it will be recomputed
-        m_dataApi->clear();
+        // m_dataApi->clear();
+        // maybe clear data only at the specific pixel
     }
     catch (std::exception &e)
     {

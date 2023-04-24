@@ -41,8 +41,12 @@ EMCA_NAMESPACE_BEGIN
 
 class DataApi {
 public:
+    void initialize(const uint32_t height, const uint32_t width, const uint32_t sampleCount);
     virtual ~DataApi() = default;
 
+    uint32_t get_current_id(const uint32_t x, const uint32_t y, const uint32_t c) const;
+
+    void setCurrentPixel(uint32_t x, uint32_t y);
     void setPathIdx(uint32_t sampleIdx);
     void setDepthIdx(uint32_t depthIdx);
 
@@ -56,52 +60,54 @@ public:
     template <typename T, std::enable_if_t<std::is_fundamental_v<T> || std::is_same_v<T, std::string>, int> = 0>
     void addPathData(const std::string& s, const T& val) {
         if (m_isCollecting)
-            m_paths.at(m_currentSampleIdx).add(s, val);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).add(s, val);
     }
 
     template <typename T, std::enable_if_t<std::is_fundamental_v<T>, int> = 0>
     void addPathData(const std::string& s, const T& val1, const T& val2) {
         if (m_isCollecting)
-            m_paths.at(m_currentSampleIdx).add(s, val1, val2);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).add(s, val1, val2);
     }
 
     template <typename T, std::enable_if_t<std::is_fundamental_v<T>, int> = 0>
     void addPathData(const std::string& s, const T& val1, const T& val2, const T& val3) {
         if (m_isCollecting)
-            m_paths.at(m_currentSampleIdx).add(s, val1, val2, val3);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).add(s, val1, val2, val3);
     }
 
     template <typename T, std::enable_if_t<std::is_fundamental_v<T>, int> = 0>
     void addPathData(const std::string& s, const T& val1, const T& val2, const T& val3, const T& val4) {
         if (m_isCollecting)
-            m_paths.at(m_currentSampleIdx).add(s, val1, val2, val3, val4);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).add(s, val1, val2, val3, val4);
     }
 
     template <typename T, std::enable_if_t<std::is_fundamental_v<T> || std::is_same_v<T, std::string>, int> = 0>
     void addIntersectionData(const std::string& s, const T& val) {
         if (m_isCollecting && m_currentDepthIdx != -1U)
-            m_paths.at(m_currentSampleIdx).intersectionAt(m_currentDepthIdx).add(s, val);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).intersectionAt(m_currentDepthIdx).add(s, val);
     }
 
     template <typename T, std::enable_if_t<std::is_fundamental_v<T>, int> = 0>
     void addIntersectionData(const std::string& s, const T& val1, const T& val2) {
         if (m_isCollecting && m_currentDepthIdx != -1U)
-            m_paths.at(m_currentSampleIdx).intersectionAt(m_currentDepthIdx).add(s, val1, val2);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).intersectionAt(m_currentDepthIdx).add(s, val1, val2);
     }
 
     template <typename T, std::enable_if_t<std::is_fundamental_v<T>, int> = 0>
     void addIntersectionData(const std::string& s, const T& val1, const T& val2, const T& val3) {
         if (m_isCollecting && m_currentDepthIdx != -1U)
-            m_paths.at(m_currentSampleIdx).intersectionAt(m_currentDepthIdx).add(s, val1, val2, val3);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).intersectionAt(m_currentDepthIdx).add(s, val1, val2, val3);
     }
 
     template <typename T, std::enable_if_t<std::is_fundamental_v<T>, int> = 0>
     void addIntersectionData(const std::string& s, const T& val1, const T& val2, const T& val3, const T& val4) {
         if (m_isCollecting && m_currentDepthIdx != -1U)
-            m_paths.at(m_currentSampleIdx).intersectionAt(m_currentDepthIdx).add(s, val1, val2, val3, val4);
+            m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).intersectionAt(m_currentDepthIdx).add(s, val1, val2, val3, val4);
     }
 
     void serialize(Stream *stream) const;
+
+    void serialize(Stream *stream, const uint32_t x, const uint32_t y) const;
 
     void enable()  { m_isCollecting = true; }
     void disable() { m_isCollecting = false; }
@@ -159,8 +165,12 @@ public:
     void clear() { m_paths.clear(); }
 
 protected:
+    // layout: H X W X C
+    // (x,y,c) -> y*(W*C) + x*C  + c
     std::vector<PathData> m_paths;
 
+    uint32_t m_height, m_width, m_sampleCount;
+    uint32_t m_x, m_y; 
     uint32_t m_currentSampleIdx {-1U};
     uint32_t m_currentDepthIdx  {-1U};
     bool m_isCollecting        {false};

@@ -49,7 +49,6 @@ class PixelData(object):
         """
         sample_count = stream.read_uint()
         self._dict_paths.clear()
-        logging.info("SampleCount: {}".format(sample_count))
         # deserialize the amount of paths which were traced through the selected pixel
         for sample in range(sample_count):
             path_data = PathData(stream)

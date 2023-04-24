@@ -30,67 +30,101 @@
 
 EMCA_NAMESPACE_BEGIN
 
+// occupy a huge memory footprint
+void DataApi::initialize(const uint32_t height, const uint32_t width, const uint32_t sampleCount)
+{
+    m_height = height;
+    m_width = width;
+    m_sampleCount = sampleCount;
+    m_paths.resize(height*width*sampleCount);
+    std::cout << "My path size is now " << m_paths.size() << std::endl;
+}
+
+uint32_t DataApi::get_current_id(const uint32_t x, const uint32_t y, const uint32_t c) const {
+    return y*(m_width*m_sampleCount) + x*m_sampleCount  + c;
+}
+
+
+void DataApi::setCurrentPixel(uint32_t x, uint32_t y) {
+    m_x = x;
+    m_y = y;
+}
+
 void DataApi::setPathIdx(uint32_t sampleIdx) {
     if (!m_isCollecting)
         return;
 	m_currentSampleIdx = sampleIdx;
     m_currentDepthIdx = -1U;
-    if (sampleIdx >= m_paths.size())
-        m_paths.resize(sampleIdx+1);
-    m_paths.at(sampleIdx).m_sampleIdx = sampleIdx; // enable path
+    // if (m_currentSampleIdx >= m_paths.size())
+    //     m_paths.resize(m_currentSampleIdx+1);
+
+    // std::cout << "current vec size: " << m_paths.size() << std::endl;
+
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).m_sampleIdx = m_currentSampleIdx; // enable path
+
 }
 
 void DataApi::setDepthIdx(uint32_t depthIdx) {
     if (!m_isCollecting)
         return;
 	m_currentDepthIdx = depthIdx;
-    m_paths.at(m_currentSampleIdx).setDepthIdx(depthIdx);
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).setDepthIdx(depthIdx);
 }
 
 void DataApi::setPathOrigin(const Point3f& origin) {
     if (!m_isCollecting)
         return;
-    m_paths.at(m_currentSampleIdx).setPathOrigin(origin);
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).setPathOrigin(origin);
 }
 
 void DataApi::setIntersectionPos(const Point3f& pos) {
     if (!m_isCollecting)
         return;
-    m_paths.at(m_currentSampleIdx).setIntersectionPos(m_currentDepthIdx, pos);
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).setIntersectionPos(m_currentDepthIdx, pos);
 }
 
 void DataApi::setNextEventEstimationPos(const Point3f& pos, bool visible) {
     if (!m_isCollecting || m_currentDepthIdx == -1U)
         return;
-    m_paths.at(m_currentSampleIdx).setNextEventEstimationPos(m_currentDepthIdx, pos, visible);
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).setNextEventEstimationPos(m_currentDepthIdx, pos, visible);
 }
 
 void DataApi::setIntersectionEstimate(const Color4f& estimate) {
     if (!m_isCollecting || m_currentDepthIdx == -1U)
         return;
-    m_paths.at(m_currentSampleIdx).setIntersectionEstimate(m_currentDepthIdx, estimate);
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).setIntersectionEstimate(m_currentDepthIdx, estimate);
 }
 
 void DataApi::setIntersectionEmission(const Color4f& emission) {
     if (!m_isCollecting || m_currentDepthIdx == -1U)
         return;
-    m_paths.at(m_currentSampleIdx).setIntersectionEmission(m_currentDepthIdx, emission);
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).setIntersectionEmission(m_currentDepthIdx, emission);
 }
 
 void DataApi::setFinalEstimate(const Color4f& estimate) {
     if (!m_isCollecting)
         return;
-    m_paths.at(m_currentSampleIdx).setFinalEstimate(estimate);
+    m_paths.at(get_current_id(m_x, m_y, m_currentSampleIdx)).setFinalEstimate(estimate);
 }
 
+// 
 void DataApi::serialize(Stream *stream) const {
-    uint32_t num_paths = std::count_if(m_paths.begin(), m_paths.end(), [](const auto& path) -> bool { return path.m_sampleIdx >= 0; });
+    serialize(stream, m_x, m_y);
+}
+
+void DataApi::serialize(Stream *stream, const uint32_t x, const uint32_t y) const {
+    uint32_t start_id = get_current_id(x, y, 0);
+    uint32_t end_id = get_current_id(x+1, y, 0);  // next pixel horizontally
+    
+    uint32_t num_paths = std::count_if(
+        m_paths.begin()+start_id, m_paths.begin()+end_id, [](const auto& path) -> bool { return path.m_sampleIdx >= 0; });
     stream->writeUInt(num_paths);
-	/* serialize path data */
-    for (auto& path : m_paths) {
+    /* serialize path data */
+    for (uint32_t ii=start_id; ii<end_id; ii++) {
+        const auto &path = m_paths.at(ii);
         if (path.m_sampleIdx != -1U) // only send enabled paths
             path.serialize(stream);
-	}
+    }
 }
 
 void DataApi::PluginApi::addPlugin(std::unique_ptr<Plugin>&& plugin) {
