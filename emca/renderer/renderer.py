@@ -28,6 +28,11 @@ import numpy as np
 from ..renderer.rubberband import RubberBandInteractor
 from ..renderer.path import Path
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+
+from vtkmodules.vtkCommonColor import vtkNamedColors
+from vtkmodules.vtkInteractionWidgets import vtkOrientationMarkerWidget
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
+
 from PySide2.QtWidgets import QFrame
 import vtk
 import logging
@@ -49,6 +54,20 @@ class Renderer(vtk.vtkRenderer):
 
         # renderer
         self.SetBackground(0.7, 0.7, 0.7)
+
+        # add coordinate frame
+        # axes = vtkAxesActor()
+
+        # widget = vtkOrientationMarkerWidget()
+        # rgba = [0] * 4
+        # colors = vtkNamedColors()
+        # colors.GetColor('Carrot', rgba)
+        # widget.SetOutlineColor(rgba[0], rgba[1], rgba[2])
+        # widget.SetOrientationMarker(axes)
+        # widget.SetInteractor(self._vtkWidget)
+        # widget.SetViewport(0.0, 0.0, 0.4, 0.4)
+        # widget.SetEnabled(1)
+        # widget.InteractiveOn()
 
         # Overall scene light
         light_kit = vtk.vtkLightKit()

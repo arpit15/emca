@@ -127,6 +127,17 @@ private:
     friend class DataApi;
 };
 
+class PathGroupData
+{
+    int _width, _height;
+    std::vector<std::vector<PathData>> m_paths;
+    
+public:
+    PathGroupData(const int width, const int height): 
+        _width(width), _height(height),
+        m_paths.reserve(width*height)
+}
+
 EMCA_NAMESPACE_END
 
 #endif /* INCLUDE_EMCA_PATHDATA_H_ */
